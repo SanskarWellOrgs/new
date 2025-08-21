@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8">
+<title>Therapy Support (Local)</title>
+<style>
+  body{font-family:system-ui;margin:2rem} .card{max-width:720px;margin:auto;padding:1.5rem;border:1px solid #ddd;border-radius:12px}
+  textarea{width:100%;min-height:120px;padding:.75rem} button{padding:.6rem 1rem;border-radius:10px}
+  .out{white-space:pre-wrap;background:#fafafa;padding:1rem;border:1px solid #eee;border-radius:10px}
+</style>
+<div class="card">
+  <h2>Therapy Support (Local Fallback)</h2>
+  <p><small>This tool is supportive only and not a replacement for professional care.</small></p>
+  <textarea id="q" placeholder="What's on your mind?"></textarea><br><br>
+  <button id="ask">Ask</button> <span id="status"></span>
+  <h3>Response</h3>
+  <div id="resp" class="out"></div>
+</div>
+<script>
+const URL = "http://127.0.0.1:8000/fallback";  // change if tunneling
+const q = document.getElementById('q'), btn = document.getElementById('ask'),
+      resp = document.getElementById('resp'), st = document.getElementById('status');
+btn.onclick = async () => {
+  const text = q.value.trim(); if(!text){resp.textContent="Type something.";return}
+  st.textContent="Thinking…"; resp.textContent="";
+  try{
+    const r = await fetch(URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});
+    const data = await r.json();
+    st.textContent = data.mode === "llm" ? "local model" : (data.mode || "ok");
+    resp.textContent = data.text || "(no text)";
+  }catch(e){ st.textContent="cannot reach agent"; resp.textContent=String(e) }
+};
+</script>
